@@ -107,6 +107,31 @@ func (api *VoiceTextAPI) Auth() (string, error) {
 	return respJson.AcessToken, err
 }
 
+func (api *VoiceTextAPI) Text2Voice(text string) fileId, error {
+	reg, err := http.NewRequest("POST", "https://voice.mcs.mail.ru/tts", text)
+	if err != nil {
+		return err
+	}
+    req.Header.Set("Authorization", "Bearer "+api.AccessToken)
+	req.Header.Set("Content-Type", "audio/ogg; codecs=opus")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+
+	responseData, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+	responseString := string(responseData)
+
+	fmt.Println(responseString)
+	return "", err
+}
+
 func (api *VoiceTextAPI) Voice2Text(file string) (string, error) {
 
 	f, err := os.Open(file)
