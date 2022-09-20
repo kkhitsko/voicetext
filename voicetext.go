@@ -116,10 +116,9 @@ func (api *VoiceTextAPI) Text2Voice(text string) (string, error) {
 		return "", err
 	}
 	req.Header.Set("Authorization", "Bearer "+api.AccessToken)
-	req.Header.Set("Content-Type", "audio/wave; codecs=opus")
+	req.Header.Set("Content-Type", "audio/wave")
 
 	filename := fmt.Sprintf("voice/%d.wav", 1)
-	log.Printf("New filename: %s", filename)
 	file, err := os.Create(filename)
 	defer file.Close()
 
@@ -130,6 +129,8 @@ func (api *VoiceTextAPI) Text2Voice(text string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	log.Printf("Voice file content type: %s", resp.Header.Get("Content-Type"))
+	log.Printf("Content size: %d; status: %s", resp.Status, resp.ContentLength)
 
 	defer resp.Body.Close()
 
