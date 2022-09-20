@@ -109,11 +109,12 @@ func (api *VoiceTextAPI) Auth() (string, error) {
 	return respJson.AcessToken, err
 }
 
-func (api *VoiceTextAPI) Text2Voice(text string) (string, error) {
+func (api *VoiceTextAPI) Text2Voice(text string, fileID string) (string, error) {
 	params := url.Values{}
 	params.Add("text", text)
-	params.Add("model_name", "pavel")
+	params.Add("model_name", "pavel-hifigan")
 	params.Add("encoder", "opus")
+	params.Add("tempo", 0.85)
 
 	uri := fmt.Sprintf("https://voice.mcs.mail.ru/tts?%s", params.Encode())
 	req, err := http.NewRequest("GET", uri, nil)
@@ -123,7 +124,7 @@ func (api *VoiceTextAPI) Text2Voice(text string) (string, error) {
 	req.Header.Set("Authorization", "Bearer "+api.AccessToken)
 	req.Header.Set("Content-Type", "audio/ogg; codecs=opus")
 
-	filename := fmt.Sprintf("voice/%d.oga", 1)
+	filename := fmt.Sprintf("voice/%s.oga", fileID)
 	file, err := os.Create(filename)
 	defer file.Close()
 
