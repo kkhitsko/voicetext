@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
+	"mime"
 	"net/http"
 	"os"
 	"strings"
@@ -116,21 +118,27 @@ func (api *VoiceTextAPI) Text2Voice(text string) (string, error) {
 	req.Header.Set("Authorization", "Bearer "+api.AccessToken)
 	req.Header.Set("Content-Type", "audio/ogg; codecs=opus")
 
+	filename := fmt.Sprintf("voice/%d.ogg", 1)
+	log.Printf("New filename: %s", filename)
+	file, err := os.Create(filename)
+	defer file.Close()
+
+	cd := mime.FormatMediaType("attachment", map[string]string{"filename": filename})
+	req.Header.Set("Content-Disposition", cd)
+
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return "", err
 	}
 
-	responseData, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
 	defer resp.Body.Close()
 
-	responseString := string(responseData)
+	_, err = io.Copy(file, resp.Body)
+	if err != nil {
+		return "", err
+	}
 
-	fmt.Println(responseString)
-	return "", err
+	return filename, err
 }
 
 func (api *VoiceTextAPI) Voice2Text(file string) (string, error) {
