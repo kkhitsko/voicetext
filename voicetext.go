@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 )
 
 type VoiceTextAPI struct {
@@ -107,12 +108,12 @@ func (api *VoiceTextAPI) Auth() (string, error) {
 	return respJson.AcessToken, err
 }
 
-func (api *VoiceTextAPI) Text2Voice(text string) fileId, error {
-	reg, err := http.NewRequest("POST", "https://voice.mcs.mail.ru/tts", text)
+func (api *VoiceTextAPI) Text2Voice(text string) (string, error) {
+	req, err := http.NewRequest("POST", "https://voice.mcs.mail.ru/tts", strings.NewReader(text))
 	if err != nil {
-		return err
+		return "", err
 	}
-    req.Header.Set("Authorization", "Bearer "+api.AccessToken)
+	req.Header.Set("Authorization", "Bearer "+api.AccessToken)
 	req.Header.Set("Content-Type", "audio/ogg; codecs=opus")
 
 	resp, err := http.DefaultClient.Do(req)
