@@ -7,10 +7,9 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
-	"mime"
 	"net/http"
+	"net/url"
 	"os"
-	"strings"
 )
 
 type VoiceTextAPI struct {
@@ -111,7 +110,13 @@ func (api *VoiceTextAPI) Auth() (string, error) {
 }
 
 func (api *VoiceTextAPI) Text2Voice(text string) (string, error) {
-	req, err := http.NewRequest("POST", "https://voice.mcs.mail.ru/tts", strings.NewReader(text))
+	params := url.Values{}
+	params.Add("text", text)
+	params.Add("model_name", "pavel")
+	params.Add("encoder", "opus")
+
+	uri := fmt.Sprintf("https://voice.mcs.mail.ru/tts?%s", params.Encode())
+	req, err := http.NewRequest("GET", uri, nil)
 	if err != nil {
 		return "", err
 	}
@@ -122,15 +127,12 @@ func (api *VoiceTextAPI) Text2Voice(text string) (string, error) {
 	file, err := os.Create(filename)
 	defer file.Close()
 
-	cd := mime.FormatMediaType("audio/ogg", map[string]string{"filename": filename})
-	req.Header.Set("Content-Disposition", cd)
-
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return "", err
 	}
 	log.Printf("Voice file content type: %s", resp.Header.Get("Content-Type"))
-	log.Printf("Content size: %d; status: %s", resp.Status, resp.ContentLength)
+	log.Printf("Content size: %s; status: %d", resp.Status, resp.ContentLength)
 
 	defer resp.Body.Close()
 
