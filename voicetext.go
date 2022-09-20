@@ -114,7 +114,7 @@ func (api *VoiceTextAPI) Text2Voice(text string, fileID string) (string, error) 
 	params.Add("text", text)
 	params.Add("model_name", "pavel-hifigan")
 	params.Add("encoder", "opus")
-	params.Add("tempo", 0.85)
+	params.Add("tempo", "0.85")
 
 	uri := fmt.Sprintf("https://voice.mcs.mail.ru/tts?%s", params.Encode())
 	req, err := http.NewRequest("GET", uri, nil)
