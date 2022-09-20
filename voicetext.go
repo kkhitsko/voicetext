@@ -116,14 +116,14 @@ func (api *VoiceTextAPI) Text2Voice(text string) (string, error) {
 		return "", err
 	}
 	req.Header.Set("Authorization", "Bearer "+api.AccessToken)
-	req.Header.Set("Content-Type", "audio/ogg; codecs=opus")
+	req.Header.Set("Content-Type", "audio/wave; codecs=opus")
 
-	filename := fmt.Sprintf("voice/%d.ogg", 1)
+	filename := fmt.Sprintf("voice/%d.wav", 1)
 	log.Printf("New filename: %s", filename)
 	file, err := os.Create(filename)
 	defer file.Close()
 
-	cd := mime.FormatMediaType("attachment", map[string]string{"filename": filename})
+	cd := mime.FormatMediaType("audio/wave", map[string]string{"filename": filename})
 	req.Header.Set("Content-Disposition", cd)
 
 	resp, err := http.DefaultClient.Do(req)
