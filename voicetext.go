@@ -2,6 +2,7 @@ package voicetext
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -9,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"time"
 	"os"
 )
 
@@ -112,12 +114,15 @@ func (api *VoiceTextAPI) Auth() (string, error) {
 func (api *VoiceTextAPI) Text2Voice(text string, fileID string) (string, error) {
 	params := url.Values{}
 	params.Add("text", text)
-	params.Add("model_name", "pavel-hifigan")
+	params.Add("model_name", "maria")
 	params.Add("encoder", "opus")
-	params.Add("tempo", "0.85")
+	params.Add("tempo", "0.9")
+
+        ctx, cncl := context.WithTimeout(context.Background(), time.Second*120)
+        defer cncl()
 
 	uri := fmt.Sprintf("https://voice.mcs.mail.ru/tts?%s", params.Encode())
-	req, err := http.NewRequest("GET", uri, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", uri, nil)
 	if err != nil {
 		return "", err
 	}
@@ -152,7 +157,11 @@ func (api *VoiceTextAPI) Voice2Text(file string) (string, error) {
 		return "", err
 	}
 	defer f.Close()
-	req, err := http.NewRequest("POST", "https://voice.mcs.mail.ru/asr", f)
+
+        ctx, cncl := context.WithTimeout(context.Background(), time.Second*120)
+        defer cncl()
+
+	req, err := http.NewRequestWithContext(ctx, "POST", "https://voice.mcs.mail.ru/asr", f)
 	if err != nil {
 		return "", err
 	}
